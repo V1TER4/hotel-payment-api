@@ -32,8 +32,10 @@ export class CieloService {
             const response = await this.httpService.get(url, { headers }).toPromise();
             return response.data;
         } catch (error) {
-            console.log('Error in get');
-            return error.response;
+            if (error.response) {
+                return error.response.data;
+            }
+            throw new Error(`Erro na requisição para Cielo: ${error.message}`);
         }
     }
 
@@ -50,7 +52,10 @@ export class CieloService {
 
             return response.data;
         } catch (error) {
-            return error.response.data;
+            if (error.response) {
+                return error.response.data;
+            }
+            throw new Error(`Erro na requisição para Cielo: ${error.message}`);
         }
     }
     
@@ -66,7 +71,10 @@ export class CieloService {
             const response = await this.httpService.put(url, {},{ headers }).toPromise();
             return response.data;
         } catch (error) {
-            return error.response.data;
+            if (error.response) {
+                return error.response.data;
+            }
+            throw new Error(`Erro na requisição para Cielo: ${error.message}`);
         }
     }
 }
