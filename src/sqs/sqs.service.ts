@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { SQSClient, SendMessageCommand, ReceiveMessageCommand, DeleteMessageCommand } from '@aws-sdk/client-sqs';
 import * as dotenv from 'dotenv';
-import { log } from 'console';
 
 dotenv.config();
 
