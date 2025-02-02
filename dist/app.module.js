@@ -12,6 +12,7 @@ const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const transaction_module_1 = require("./modules/transaction/transaction.module");
 const sqs_service_1 = require("./sqs/sqs.service");
+const sqsConsumer_service_1 = require("./sqs/sqsConsumer.service");
 const config_1 = require("@nestjs/config");
 const axios_1 = require("@nestjs/axios");
 let AppModule = class AppModule {
@@ -21,7 +22,7 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [config_1.ConfigModule.forRoot(), axios_1.HttpModule, transaction_module_1.TransactionModule],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService, sqs_service_1.SqsService],
+        providers: [app_service_1.AppService, sqs_service_1.SqsService, sqsConsumer_service_1.SqsConsumerService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map
