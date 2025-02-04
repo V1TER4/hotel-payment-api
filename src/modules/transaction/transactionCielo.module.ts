@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { TransactionController } from './transaction.controller';
-import { TransactionService } from './transaction.service';
+import { TransactionController } from './transactionCielo.controller';
+import { TransactionService } from './transactionCielo.service';
 import { SqsService } from '../../sqs/sqs.service';
 import { CieloService } from 'src/cielo/cielo.service';
 import { HttpModule } from '@nestjs/axios';

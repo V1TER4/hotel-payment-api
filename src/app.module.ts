@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TransactionModule } from './modules/transaction/transaction.module';
+import { TransactionModule } from './modules/transaction/transactionCielo.module';
 import { SqsService } from './sqs/sqs.service';
 import { SqsConsumerService } from './sqs/sqsConsumer.service';
 import { ConfigModule } from '@nestjs/config';

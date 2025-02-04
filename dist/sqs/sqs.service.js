@@ -26,28 +26,22 @@ let SqsService = class SqsService {
         this.queueUrl = process.env.SQS_QUEUE_URL;
     }
     async sendMessage(messageBody) {
+        const resolvedMessageBody = await Promise.resolve(messageBody);
+        const message = JSON.stringify(resolvedMessageBody);
         const command = new client_sqs_1.SendMessageCommand({
             QueueUrl: this.queueUrl,
-            MessageBody: messageBody,
-            MessageGroupId: "hotel-reserve-payment",
+            MessageBody: message,
+            MessageAttributes: {
+                "QueueType": {
+                    DataType: "String",
+                    StringValue: "Confirmation"
+                }
+            },
+            MessageGroupId: "api-hotel-booking",
             MessageDeduplicationId: this.generateMessageDeduplicationId(),
         });
-        const send = await this.sqsClient.send(command);
-        console.log('Mensagem enviada:', messageBody);
-    }
-    async receiveMessages() {
-        const command = new client_sqs_1.ReceiveMessageCommand({
-            QueueUrl: this.queueUrl,
-            MaxNumberOfMessages: 1,
-            WaitTimeSeconds: 10,
-        });
-        const response = await this.sqsClient.send(command);
-        if (response.Messages) {
-            for (const message of response.Messages) {
-                console.log('Mensagem recebida:', message.Body);
-                await this.deleteMessage(message.ReceiptHandle);
-            }
-        }
+        await this.sqsClient.send(command);
+        console.log('Message send: ', messageBody);
     }
     async deleteMessage(receiptHandle) {
         const command = new client_sqs_1.DeleteMessageCommand({
@@ -55,7 +49,6 @@ let SqsService = class SqsService {
             ReceiptHandle: receiptHandle,
         });
         await this.sqsClient.send(command);
-        console.log('Mensagem deletada');
     }
     generateMessageDeduplicationId(length = 32) {
         const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';

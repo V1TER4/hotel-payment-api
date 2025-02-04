@@ -16,6 +16,7 @@ export class TransactionService {
     }
 
     async createTransaction(transaction: any): Promise<any> {
+        transaction = JSON.stringify(transaction);
         const response = await this.cieloService.post('/1/sales/', transaction);
         return response;
     }

@@ -10,6 +10,7 @@ dotenv.config();
 export class SqsConsumerService implements OnModuleInit {
     private sqsClient: SQSClient;
     private queueUrl: string;
+    private consumerInterval: NodeJS.Timeout;
 
     constructor(private readonly httpService: HttpService) {
         this.sqsClient = new SQSClient({
@@ -23,41 +24,55 @@ export class SqsConsumerService implements OnModuleInit {
         this.queueUrl = process.env.SQS_QUEUE_URL;
     }
 
-
     onModuleInit() {
-        this.startConsumer();
+        // this.startConsumer();
     }
 
     startConsumer() {
         const app = Consumer.create({
             queueUrl: this.queueUrl,
             handleMessage: async (message) => {
-                console.log('Mensagem recebida:', message.Body);
-                
-                const { endpoint, payload } = JSON.parse(message.Body);
-                await this.sendMessageToEndpoint(endpoint, payload);
+                const attributes = message.MessageAttributes || {};
+                const queueType = attributes.QueueType?.StringValue || "Unknown";
+
+                if (queueType !== "Payment") {
+                    console.log("Message Ignored");
+                    return;
+                }
+
+                const transactionType = attributes.TransactionUrl?.StringValue || "Unknown";
+                if (!transactionType) {
+                    console.error("TransactionUrl not found");
+                    return;
+                }
+
+                const payload = JSON.parse(message.Body);
+                await this.sendMessageToEndpoint(transactionType, payload);
             },
             sqs: this.sqsClient,
+            messageAttributeNames: ["All"],
+            shouldDeleteMessages: false,
         });
 
         app.on('error', (err) => {
-            console.error('Erro no consumidor SQS:', err.message);
+            console.error('Erro no consumidor SQS: ', err.message);
         });
 
         app.on('processing_error', (err) => {
-            console.error('Erro ao processar mensagem:', err.message);
+            console.error('Erro ao processar mensagem: ', err.message);
         });
 
-        app.start();
-        console.log('Consumidor SQS iniciado.');
+        const interval = parseInt(process.env.CONSUMER_INTERVAL || '60000', 10); // Default to 60 seconds
+        this.consumerInterval = setInterval(() => {
+            app.start();
+            console.log('Consumidor SQS iniciado.');
+        }, interval);
     }
 
     async sendMessageToEndpoint(endpoint: string, payload: any) {
-        const endpointUrl = process.env.ENDPOINT_URL;
-
         try {
             const response = await this.httpService
-                .post(endpointUrl, { message: payload })
+                .post(process.env.APP_URL + endpoint, payload)
                 .toPromise();
 
             console.log('Mensagem enviada para o endpoint:', response.data);
@@ -66,4 +81,10 @@ export class SqsConsumerService implements OnModuleInit {
         }
     }
 
+    stopConsumer() {
+        if (this.consumerInterval) {
+            clearInterval(this.consumerInterval);
+            console.log('Consumidor SQS parado.');
+        }
+    }
 }
