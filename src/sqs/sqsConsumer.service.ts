@@ -25,7 +25,7 @@ export class SqsConsumerService implements OnModuleInit {
     }
 
     onModuleInit() {
-        // this.startConsumer();
+        this.startConsumer();
     }
 
     startConsumer() {
@@ -62,7 +62,7 @@ export class SqsConsumerService implements OnModuleInit {
             console.error('Erro ao processar mensagem: ', err.message);
         });
 
-        const interval = parseInt(process.env.CONSUMER_INTERVAL || '60000', 10); // Default to 60 seconds
+        const interval = parseInt(process.env.CONSUMER_INTERVAL || '6000', 10); // Default to 60 seconds
         this.consumerInterval = setInterval(() => {
             app.start();
             console.log('Consumidor SQS iniciado.');
